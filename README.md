@@ -24,3 +24,5 @@ If you have an AWS account, you can follow the steps below to get this working f
 1. On `Step 3: Configure Instance`, once you're done configuring everything to your liking, at the bottom you'll see a field for `User data`. Select the `As file` radio button, and upload `userdata.sh`.
 1. Configure the rest of your server to your liking with regards to storage, tags, and security groups.
 1. Launch your server and enjoy! :)
+
+Alternatively, if you have an AWS account and want the power to control your Minecraft server from the comfort of your very own Discord server, [checkout my `discord-ec2-manager` project](https://github.com/jacob-howe/discord-ec2-manager).
