@@ -26,3 +26,10 @@ If you have an AWS account, you can follow the steps below to get this working f
 1. Launch your server and enjoy! :)
 
 Alternatively, if you have an AWS account and want the power to control your Minecraft server from the comfort of your very own Discord server, [checkout my `discord-ec2-manager` project](https://github.com/jacob-howe/discord-ec2-manager).
+
+## Additional Links / Resources
+* [Minecraft Wiki](https://minecraft.fandom.com/wiki/Minecraft_Wiki)
+* [`server.properties` Breakdown via Minecraft Wiki](https://minecraft.fandom.com/wiki/Server.properties)
+* [Mojang's End User License Agreement (EULA) for Minecraft](https://account.mojang.com/documents/minecraft_eula)
+* [`discord-ec2-manager` Project by yours truly :)](https://github.com/jacob-howe/discord-ec2-manager)
+* [Amazon Web Services' (AWS) 'Getting Started with EC2' Guide](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EC2_GetStarted.html)
