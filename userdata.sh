@@ -18,7 +18,7 @@ fi
 # Change directories into newly created minecraft user's home directory
 cd /home/minecraft
 
-# Pulls in start_minecraft.sh and check_users.sh
+# Pulls in eula & server.properties
 git clone https://github.com/jacob-howe/mc-server.git
 
 # Tests that mc-server was cloned successfully
@@ -91,7 +91,29 @@ ExecStart=/home/minecraft/player_check.sh
 WantedBy=multi-user.target' > /etc/systemd/system/player_check.service
 
 # Setting perms on player_check.service
-sudo chmod 644 /etc/systemd/system/minecraft.service
+sudo chmod 644 /etc/systemd/system/player_check.service
+
+# Creates service for our Service Check
+sudo echo '[Unit]
+Description=Serves status of Minecraft over port 7777
+Wants=network.target
+After=local-fs.target network.target minecraft.service
+
+[Service]
+User=minecraft
+Group=minecraft
+UMask=0027
+
+KillMode=none
+SuccessExitStatus=0 1 255
+
+ExecStart=/home/minecraft/service_check.sh
+
+[Install]
+WantedBy=multi-user.target' > /etc/systemd/system/service_check.service
+
+# Setting perms on service_check.service
+sudo chmod 644 /etc/systemd/system/service_check.service
 
 sudo echo '#!/bin/bash
 
@@ -154,12 +176,20 @@ fi
 logger "Shutting down Server in 1 minute..."
 sudo shutdown' > /home/minecraft/player_check.sh
 
-# Setting perms on player_check.service
-sudo chmod 644 /etc/systemd/system/player_check.service
+sudo echo '#!/bin/bash
+set -e
 
-# Enable both services so that they run on reboot
+cd /home/minecraft/mc-server
+sudo chmod a+x service-check
+
+bash -c "./service-check -svc minecraft.service -p 7777"
+' > /home/minecraft/service_check.sh
+
+
+# Enable all services so that they run on reboot
 sudo systemctl enable minecraft
 sudo systemctl enable player_check
+sudo systemctl enable service_check
 
 # Makes shell scripts executable in mc-server/
 chmod a+x /home/minecraft/*.sh
@@ -167,3 +197,4 @@ chmod a+x /home/minecraft/*.sh
 # Start the services
 sudo systemctl start minecraft
 sudo systemctl start player_check
+sudo systemctl start service_check
