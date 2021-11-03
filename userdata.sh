@@ -179,7 +179,8 @@ sudo shutdown' > /home/minecraft/player_check.sh
 sudo echo '#!/bin/bash
 set -e
 
-cd /home/minecraft
+cd /home/minecraft/mc-server
+sudo chmod a+x service-check
 
 bash -c "./service-check -svc minecraft.service -p 7777"
 ' > /home/minecraft/service_check.sh
