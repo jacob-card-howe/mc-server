@@ -6,6 +6,8 @@ About once a year or so, my friends and I get an itch to play some Minecraft tog
 
 ## What's in here?
 
+`service-check`: An executable built from my [`service-check` Github Project](https://github.com/jacob-howe/service-check). It is used to broadcast whether or not Minecraft is running over port 7777. You can configure what port this service check runs on by changing line 184 in `userdata.sh`
+
 `eula.txt`: Accepts Mojang's [end user license agreement](https://account.mojang.com/documents/minecraft_eula).
 
 `server.properties`: The properties I've set for my friends' and I's Minecraft server. Check out [this Minecraft Wiki on `server.properties`](https://minecraft.fandom.com/wiki/Server.properties) for more information on what each argument changes.
@@ -32,4 +34,5 @@ Alternatively, if you have an AWS account and want the power to control your Min
 * [`server.properties` Breakdown via Minecraft Wiki](https://minecraft.fandom.com/wiki/Server.properties)
 * [Mojang's End User License Agreement (EULA) for Minecraft](https://account.mojang.com/documents/minecraft_eula)
 * [`discord-ec2-manager` Project by yours truly :)](https://github.com/jacob-howe/discord-ec2-manager)
+* [`service-check` Project by yours truly :)](https://github.com/jacob-howe/service-check)
 * [Amazon Web Services' (AWS) 'Getting Started with EC2' Guide](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EC2_GetStarted.html)
