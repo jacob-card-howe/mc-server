@@ -33,8 +33,8 @@ fi
 # Change directories into freshly pulled mc-server
 cd mc-server/
 
-# Downloads Minecraft Server 1.17.1
-wget https://launcher.mojang.com/v1/objects/a16d67e5807f57fc4e550299cf20226194497dc2/server.jar
+# Downloads Minecraft Server 1.18.1
+wget https://launcher.mojang.com/v1/objects/125e5adf40c659fd3bce3e66e67a16bb49ecc1b9/server.jar
 
 # Gives ownership of newly pulled directory to Minecraft user
 chown -R minecraft:minecraft .
@@ -68,6 +68,7 @@ sudo chmod 644 /etc/systemd/system/minecraft.service
 # Creates start up script for Minecraft Server Service
 sudo echo '#!/bin/bash
 cd /home/minecraft/mc-server
+java -Xmx3072M -Xms512M -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalPacing -XX:ParallelGCThreads=2 -XX:+AggressiveOpts -jar server.jar nogu
 java -Xms1024M -Xmx3072M -XX:ParallelGCThreads=1 -jar server.jar nogui
 ' > /home/minecraft/start_minecraft.sh
 
