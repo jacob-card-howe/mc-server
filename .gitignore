@@ -1,0 +1,2 @@
+# Prevents accidental uploads of the minecraft-data volume
+minecraft-data*

@@ -5,7 +5,7 @@ sudo adduser --disabled-password --gecos 'User for running and managing Minecraf
 sudo echo "minecraft     ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 sudo apt update # Updates apt repository
-sudo apt install openjdk-16-jre-headless -y # Installs java
+sudo apt install openjdk-17-jre-headless -y # Installs java
 
 # Tests that Java was installed successfully and is executable
 if ! [ -x "$(command -v java)" ]; then
@@ -33,8 +33,8 @@ fi
 # Change directories into freshly pulled mc-server
 cd mc-server/
 
-# Downloads Minecraft Server 1.18.1
-wget https://launcher.mojang.com/v1/objects/125e5adf40c659fd3bce3e66e67a16bb49ecc1b9/server.jar
+# Downloads Minecraft Server 1.19.2
+wget https://piston-data.mojang.com/v1/objects/f69c284232d7c7580bd89a5a4931c3581eae1378/server.jar
 
 # Gives ownership of newly pulled directory to Minecraft user
 chown -R minecraft:minecraft .

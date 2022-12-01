@@ -1,0 +1,25 @@
+version: "3"
+
+services:
+  minecraft:
+    image: itzg/minecraft-server
+    ports:
+      - 25565:25565
+    environment:
+      EULA: "TRUE"
+      SERVER_NAME: "Minecraft, in 2022!"
+      MOTD: "Needs more dedidated wam."
+      DIFFICULTY: hard
+      MAX_PLAYERS: 15
+      MAX_WORLD_SIZE: 2000
+      SNOOPER_ENABLED: false
+      VIEW_DISTANCE: 15
+      MEMORY: 6G
+      ENABLE_ROLLING_LOGS: true
+      ENABLE_AUTOPAUSE: "TRUE"
+    tty: true
+    stdin_open: true
+    restart: unless-stopped
+    volumes:
+      # attach a directory relative to the directory containing this compose file
+      - ./minecraft-data:/data
