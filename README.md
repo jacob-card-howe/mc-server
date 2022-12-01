@@ -27,6 +27,8 @@ If you have an AWS account, you can follow the steps below to get this working f
 1. Configure the rest of your server to your liking with regards to storage, tags, and security groups.
 1. Launch your server and enjoy! :)
 
+Alternatively, if you have an AWS account and want the power to control your Minecraft server from the comfort of your very own Discord server, [checkout my `discord-ec2-manager` project](https://github.com/jacob-howe/discord-ec2-manager).
+
 ## What if I don't have an AWS account?
 If you _don't_ have an AWS account, you can run the server locally via Docker & Docker Compose
 
@@ -34,8 +36,6 @@ If you _don't_ have an AWS account, you can run the server locally via Docker & 
 1. Open `Docker Desktop` and ensure that the docker engine is running on your computer
 1. Open Powershell and type `docker compose up -d`
 1. Open Minecraft and your server should be up on port `25565`!
-
-Alternatively, if you have an AWS account and want the power to control your Minecraft server from the comfort of your very own Discord server, [checkout my `discord-ec2-manager` project](https://github.com/jacob-howe/discord-ec2-manager).
 
 ## Additional Links / Resources
 * [Minecraft Wiki](https://minecraft.fandom.com/wiki/Minecraft_Wiki)
