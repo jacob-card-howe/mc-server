@@ -33,8 +33,8 @@ fi
 # Change directories into freshly pulled mc-server
 cd mc-server/
 
-# Downloads Minecraft Server 1.19.2
-wget https://piston-data.mojang.com/v1/objects/f69c284232d7c7580bd89a5a4931c3581eae1378/server.jar
+# Downloads Minecraft Server 1.20.1
+wget https://piston-data.mojang.com/v1/objects/84194a2f286ef7c14ed7ce0090dba59902951553/server.jar
 
 # Gives ownership of newly pulled directory to Minecraft user
 chown -R minecraft:minecraft .

@@ -2,21 +2,24 @@ version: "3"
 
 services:
   minecraft:
-    image: itzg/minecraft-server
+    image: itzg/minecraft-server:java17-openj9
     ports:
       - 25565:25565
     environment:
       EULA: "TRUE"
-      SERVER_NAME: "Minecraft, in 2022!"
+      SERVER_NAME: "Minecraft, in 2023!"
       MOTD: "Needs more dedidated wam."
       DIFFICULTY: hard
       MAX_PLAYERS: 15
-      MAX_WORLD_SIZE: 2000
-      SNOOPER_ENABLED: false
+      MAX_WORLD_SIZE: 5000
       VIEW_DISTANCE: 15
       MEMORY: 6G
-      ENABLE_ROLLING_LOGS: true
+      ENABLE_ROLLING_LOGS: 1
       ENABLE_AUTOPAUSE: "TRUE"
+      OVERRIDE_SERVER_PROPERTIES: "TRUE"
+      MAX_TICK_TIME: "-1"
+      AUTOPAUSE_TIMEOUT_INIT: "300"
+      AUTOPAUSE_TIMEOUT_EST: "300"
     tty: true
     stdin_open: true
     restart: unless-stopped
