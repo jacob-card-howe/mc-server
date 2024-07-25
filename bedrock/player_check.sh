@@ -8,6 +8,9 @@ touch .start_minecraft
 
 sudo chown -R minecraft:minecraft .
 
+logger "Initializing player_check.sh..."
+sleep 120
+
 while true; do
     logger "Player check loop has begun, or started anew!"
 
