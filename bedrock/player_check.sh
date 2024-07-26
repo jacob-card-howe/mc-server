@@ -36,7 +36,8 @@ while true; do
             logger "Checking to see if anyone has come online..."
             sudo timeout "5" tcpdump -i any 'udp port 19132 and dst port 19132' > .tcp_dump &
             sleep 5
-            NUMPACKETS=$(wc -l < .tcp_dump)
+            NUMLINES=$(wc -l < .tcp_dump)
+            NUMPACKETS=$(($NUMLINES - 1))
             if [ $NUMPACKETS -gt 0 ]
             then
                 logger "Someone came online. There were $NUMPACKETS sent recently."
@@ -46,7 +47,6 @@ while true; do
         break
     fi
 done
-
 
 sudo systemctl stop minecraft.service
 
