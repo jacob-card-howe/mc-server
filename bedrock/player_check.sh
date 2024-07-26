@@ -18,7 +18,7 @@ while true; do
     sudo timeout "5" tcpdump -i any 'udp port 19132 and dst port 19132' > .tcp_dump &
     sleep 5
 
-    logger "Setting current number of online users online by reading .online_users"
+    logger "Setting number of recently sent packets by reading .tcp_dump"
     NUMLINES=$(wc -l < .tcp_dump)
     NUMPACKETS=$(($NUMLINES - 1))
 
@@ -34,9 +34,9 @@ while true; do
         while [ $SECONDS -lt $TIMEOUTMAX ] && [ $NUMPACKETS -lt 1 ] ;
         do
             logger "Checking to see if anyone has come online..."
-            sudo timeout "5" tcpdump -i any 'udp port 19132 and dst port 19132' > .online_users &
+            sudo timeout "5" tcpdump -i any 'udp port 19132 and dst port 19132' > .tcp_dump &
             sleep 5
-            NUMPACKETS=$(wc -l < .online_users)
+            NUMPACKETS=$(wc -l < .tcp_dump)
             if [ $NUMPACKETS -gt 0 ]
             then
                 logger "Someone came online. There were $NUMPACKETS sent recently."
