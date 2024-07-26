@@ -45,7 +45,7 @@ else
     # Create service for Minecraft Bedrock server
     # Pulls in eula & server.properties
     logger "Cloning mc-server for helper files..."
-    git clone https://github.com/jacob-howe/mc-server.git
+    git clone https://github.com/jacob-card-howe/mc-server.git
 
     # Tests that mc-server was cloned successfully
     GIT_CLONE_CHECK=$(ls $MINECRAFT_HOME_DIR | wc -l)
