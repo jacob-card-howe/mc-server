@@ -5,7 +5,7 @@ set -e
 cd /home/minecraft/bedrock_server
 touch .tcp_dump
 
-sudo chown -R minecraft:minecraft
+sudo chown -R minecraft:minecraft .
 
 logger "Initializing player_check.sh and allowing Minecraft Bedrock server to start..."
 sleep 120
