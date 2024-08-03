@@ -89,31 +89,52 @@ else
     KillMode=none
     SuccessExitStatus=0 1 255
 
-    ExecStart=/home/minecraft/mc-server/bedrock/player_check.sh
+    ExecStart=/usr/bin/bash /home/minecraft/mc-server/bedrock/player_check.sh
 
     [Install]
     WantedBy=multi-user.target' > /etc/systemd/system/player_check.service
+
+    sudo echo '[Unit]
+    Description=Checks that the Minecraft Bedrock server is running
+    Wants=network.target
+    After=local-fs.target network.target minecraft.service
+    [Service]
+    User=minecraft
+    Group=minecraft
+    UMask=0027
+
+    KillMode=none
+    SuccessExitStatus=0 1 255
+
+    ExecStart=/usr/bin/python3 /home/minecraft/mc-server/bedrock/service_check.py
+
+    [Install]
+    WantedBy=multi-user.target' > /etc/systemd/system/service_check.service
 
     # Grant execution permissions to *_server.sh
     logger "Granting executor permissions to bash scripts..."
     sudo chmod +x $MINECRAFT_HOME_DIR/mc-server/bedrock/start_server.sh
     sudo chmod +x $MINECRAFT_HOME_DIR/mc-server/bedrock/stop_server.sh
     sudo chmod +x $MINECRAFT_HOME_DIR/mc-server/bedrock/player_check.sh
+    sudo chmod +x $MINECRAFT_HOME_DIR/mc-server/bedrock/service_check.py
 
     # Set permissions on minecraft.service
     logger "Granting 644 on created services..."
     sudo chmod 644 /etc/systemd/system/minecraft.service
     sudo chmod 644 /etc/systemd/system/player_check.service
+    sudo chmod 644 /etc/systemd/system/service_check.service
 
     # Enable the service
     logger "Enabling services..."
     sudo systemctl enable minecraft
     sudo systemctl enable player_check
+    sudo systemctl enable service_check
 
     # Start the services
     logger "Starting services..."
     sudo systemctl start minecraft
     sleep 120
     sudo systemctl start player_check
+    sudo systemctl start service_check
     exit 0
 fi
