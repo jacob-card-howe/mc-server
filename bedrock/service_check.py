@@ -22,12 +22,12 @@ class ServiceStatusHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
-            self.wfile.write(b"Service is running")
+            self.wfile.write(b"Minecraft Bedrock is running")
         else:
             self.send_response(400)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
-            self.wfile.write(b"Service is not running or an error occurred")
+            self.wfile.write(b"Minecraft Bedrock is not running or an error occurred when checking status.")
 
 def run(server_class=HTTPServer, handler_class=ServiceStatusHandler, port=7777):
     server_address = ('', port)
