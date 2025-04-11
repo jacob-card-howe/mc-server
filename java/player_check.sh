@@ -2,19 +2,19 @@
 
 set -e
 
-cd /home/minecraft/bedrock_server
+cd /home/minecraft/java_server
 touch .tcp_dump
 
 sudo chown -R minecraft:minecraft .
 
-logger "Initializing player_check.sh and allowing Minecraft Bedrock server to start..."
+logger "Initializing player_check.sh and allowing Minecraft Java server to start..."
 sleep 120
 
 while true; do
     logger "Player check loop has begun, or started anew!"
 
-    logger "Calculating current server network traffic on port 19132 via tcpdump, sleeping for 10 seconds"
-    sudo timeout "5" tcpdump -i any 'udp port 19132 and dst port 19132' > .tcp_dump &
+    logger "Calculating current server network traffic on port 25565 via tcpdump, sleeping for 10 seconds"
+    sudo timeout "5" tcpdump -i any 'tcp port 25565 and dst port 25565' > .tcp_dump &
     sleep 10
 
     logger "Setting number of recently sent packets by reading .tcp_dump"
@@ -32,7 +32,7 @@ while true; do
         while [ $SECONDS -lt $TIMEOUTMAX ] && [ $NUMPACKETS -lt 10 ] ;
         do
             logger "Checking to see if anyone has come online..."
-            sudo timeout "5" tcpdump -i any 'udp port 19132 and dst port 19132' > .tcp_dump &
+            sudo timeout "5" tcpdump -i any 'tcp port 25565 and dst port 25565' > .tcp_dump &
             sleep 10
             NUMLINES=$(wc -l < .tcp_dump)
             NUMPACKETS=$(($NUMLINES - 1))
