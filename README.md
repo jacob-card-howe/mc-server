@@ -1,6 +1,11 @@
 # mc-server
 A place for me to keep my scripts relating to my Minecraft server
 
+> ⚠️ **_As of writing (April 12, 2025), this repository's structure has changed
+> significantly. I am unsure of what works, and what doesn't, and I can't be
+> bothered to update this README right now! Read through the scripts carefully,
+> and the included comments should help you sort out what to do._**
+
 ## General Description
 About once a year or so, my friends and I get an itch to play some Minecraft together. This repository serves as a script dump for the server.
 
