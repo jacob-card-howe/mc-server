@@ -8,7 +8,7 @@ MINECRAFT_HOME_DIR=/home/minecraft
 MINECRAFT_JAVA_DIR=$MINECRAFT_HOME_DIR/java_server
 
 # Java Server v1.21.5 Server Download URL
-DOWNLOAD_URL="https://piston-data.mojang.com/v1/objects/e6ec2f64e6080b9b5d9b471b291c33cc7f509733/server.jar" # REPLACE WITH DESIRED VERSION
+DOWNLOAD_URL="https://piston-data.mojang.com/v1/objects/e6ec2f64e6080b9b5d9b471b291c33cc7f509733/server.jar"
 
 # Checks to see if Minecraft has already been installed or not.
 if [ -d $MINECRAFT_JAVA_DIR ]; then
@@ -55,6 +55,11 @@ else
         logger "Unable to clone Minecraft Java server helper files."
         exit 1
     fi
+
+    # Copies the server.properties file, and the eula.txt file to the java_server directory
+    logger "Copying server.properties and eula.txt to java_server directory..."
+    sudo cp $MINECRAFT_HOME_DIR/mc-server/java/server.properties $MINECRAFT_JAVA_DIR/server.properties
+    sudo cp $MINECRAFT_HOME_DIR/mc-server/java/eula.txt $MINECRAFT_JAVA_DIR/eula.txt
 
     # Creates service for Minecraft Java Server that runs on startup
     logger "Creating Minecraft Java Server service..."
