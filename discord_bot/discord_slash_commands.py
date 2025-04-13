@@ -1,7 +1,7 @@
 # This python script was written, and tested in Google Cloud Functions running
 # on a Pyhon 3.12 Base Image (Ubuntu 22.04 Full). It has not been tested for
 # any other Cloud Provider, though I suspect porting it to AWS or Azure wouldn't
-# be too large of a lift. 
+# be too large of a lift.
 
 # Some important notes about the Cloud Run Function's configuration within GCP:
 # 1. You need to allow ALL ingress traffic, and unauthenticated requests
@@ -12,12 +12,12 @@
 # Make sure to replace any default '<REPLACE_ME>' values with your own configs
 
 # @TODO: Add this to the README
-
 import functions_framework
 import requests
 import time
 import sys
 import random
+import os
 from typing import Any
 
 from google.api_core.extended_operation import ExtendedOperation
@@ -28,13 +28,13 @@ from flask import jsonify
 from nacl.exceptions import BadSignatureError
 from nacl.signing import VerifyKey
 
-app_id = "<REPLACE_ME>"
-discord_channel_id = "<REPLACE_ME>"
+app_id = os.environ.get("DISCORD_APP_ID")
+dedidated_wam_id = os.environ.get("DISCORD_SERVER_ID")
 
-public_discord_key = "<REPLACE_ME>"
-bot_token = "<REPLACE_ME>"
+public_discord_key = os.environ.get("DISCORD_APP_PUBLIC_KEY")
+bot_token = os.environ.get("DISCORD_BOT_TOKEN")
 
-gcp_project = "<REPLACE_ME>"
+gcp_project = os.environ.get("GCP_PROJECT")
 
 instance_choices = [] # Gets populated below
 
@@ -45,7 +45,7 @@ def get_instance_by_value(instance_value):
     return None
 
 def register_commands(command):
-    url = f"https://discord.com/api/v10/applications/{app_id}/guilds/{discord_channel_id}/commands"
+    url = f"https://discord.com/api/v10/applications/{app_id}/guilds/{dedidated_wam_id}/commands"
 
     headers = {
         "Authorization": f"Bot {bot_token}"
@@ -53,10 +53,8 @@ def register_commands(command):
 
     response = requests.post(url, headers=headers, json=command)
     if response.status_code == "200":
-        #print(f"LINE 22: {response.json}")
         return True
-    #else:
-        #print(f"LINE 25: {response.json}")
+
     return False
 
 def default_reply(interaction_id, interaction_token):
@@ -106,7 +104,7 @@ def start_server(interaction_id, interaction_token, server_name):
         "type": 4,
         "data": {
                 "tts": False,
-                "content": f"**Successfully started `{server_name}`!**\n\nThe game server should be up and running at `{found_instance["server_url"]}`!",
+                "content": f"**Successfully started `{server_name}`!**\n\nThe game server should be up and running at `{found_instance["server_url"]}`!\n\n_You can also access it via the public IP address found via the `/status` command._",
                 "embeds": [],
                 "allowed_mentions": {"parse": []},
         }
@@ -194,15 +192,16 @@ def status_server(interaction_id, interaction_token, server_name):
     )
 
     network_interface = instance_info.network_interfaces[0]
+    access_config = network_interface.access_configs[0]
+    public_ip = access_config.nat_i_p
 
-    public_ip = ""
     game_server_status = ""
 
     # Check if an access config is available
     if network_interface.access_configs:
-        # Assume the first access config has the external IP
-        access_config = network_interface.access_configs[0]
-        public_ip = access_config.nat_i_p
+        # # Assume the first access config has the external IP
+        # access_config = network_interface.access_configs[0]
+        # public_ip = access_config.nat_i_p
 
         try:
             game_server_response = requests.get(f"http://{public_ip}:7777", timeout=0.25)
@@ -212,7 +211,7 @@ def status_server(interaction_id, interaction_token, server_name):
                 "type": 4,
                 "data": {
                         "tts": False,
-                        "content": f"**Server info:**\n* Host Status: `{instance_info.status}`\n* Game Server Status: `{game_server_status}`",
+                        "content": f"**Server info:**\n* Host Status: `{instance_info.status}`\n* Game Server Status: `{game_server_status}`\n* Public IP: `{public_ip}`",
                         "embeds": [],
                         "allowed_mentions": {"parse": []},
                 }
@@ -223,17 +222,17 @@ def status_server(interaction_id, interaction_token, server_name):
         # print(game_server_response) # Debug
         # print(game_server_response.status_code) # Debug
         if game_server_response.status_code == 200:
-            game_server_status = "Minecraft Bedrock is running!"
+            game_server_status = "Minecraft is running!"
         else:
-            game_server_status = "Either Minecraft Bedrock is not running, or the host server is down. Couldn't get game server status, try again later!"
+            game_server_status = "Either Minecraft is not running, or the host server is down. Couldn't get game server status, try again later!"
     else:
-        game_server_status = "The host is offline. Minecraft Bedrock is not running."
+        game_server_status = "The host is offline. Minecraft is not running."
 
     reply = {
         "type": 4,
         "data": {
                 "tts": False,
-                "content": f"**Server info:**\n* Host Status: `{instance_info.status}`\n* Game Server Status: `{game_server_status}`",
+                "content": f"**Server info:**\n* Host Status: `{instance_info.status}`\n* Game Server Status: `{game_server_status}`\n* Public IP: `{public_ip}`",
                 "embeds": [],
                 "allowed_mentions": {"parse": []},
         }
@@ -253,7 +252,6 @@ def validate_request(request):
         return False
     return True
 
-# Generates a random integer used to perform server stop actions
 def generate_2fa():
     return random.randint(10000000, 99999999)
 
@@ -298,11 +296,19 @@ print(f"Stop Code: {stop_code}")
 # Because the AggregateList API method takes too long, we're going to hardcode options here
 instances = [
     {
-        "name": "<REPLACE_ME>",
-        "instance_value": "<REPLACE_ME>",
-        "project": "<REPLACE_ME>",
-        "zone": "<REPLACE_ME>",
-        "server_url": "<REPLACE_ME>",
+        "name": "Minecraft 2024 (Bedrock)",
+        "instance_value": "minecraft-2024",
+        "project": "jch-minecraft",
+        "zone": "us-east5-c",
+        "server_url": "minecraft.card-howe.com:19132",
+        "stop_code": stop_code
+    },
+    {
+        "name": "Minecraft 2025 (Java)",
+        "instance_value": "minecraft-2025",
+        "project": "jch-minecraft",
+        "zone": "us-east5-c",
+        "server_url": "minecraft.card-howe.com:25565",
         "stop_code": stop_code
     },
 ]
