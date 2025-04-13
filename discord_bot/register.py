@@ -40,21 +40,21 @@ print(f"Stop Code: {stop_code}")
 # Because the AggregateList API method takes too long, we're going to hardcode options here
 instances = [
     {
-        "name": "Minecraft 2024",
-        "instance_value": "minecraft-2024",
-        "project": gcp_project,
-        "zone": "us-east5-c",
-        "server_url": "minecraft.card-howe.com:19132",
-        "stop_code": stop_code
-    },
-    {
-        "name": "Minecraft 2025",
+        "name": "Minecraft 2025 (Java)",
         "instance_value": "minecraft-2025",
         "project": gcp_project,
         "zone": "us-east5-c",
-        "server_url": "minecraft.card-howe.com:25565",
+        "server_url": "2025.minecraft.card-howe.com:25565",
         "stop_code": stop_code
     }
+    {
+        "name": "Minecraft 2024 (Bedrock)",
+        "instance_value": "minecraft-2024",
+        "project": gcp_project,
+        "zone": "us-east5-c",
+        "server_url": "2024.minecraft.card-howe.com:19132",
+        "stop_code": stop_code
+    },
 ]
 
 for instance in instances:
