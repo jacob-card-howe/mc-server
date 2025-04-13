@@ -5,8 +5,11 @@ logger "Stopping minecraft.service..."
 MINECRAFT_HOME_DIR=/home/minecraft
 MINECRAFT_JAVA_DIR=$MINECRAFT_HOME_DIR/java_server
 
-# Stop the minecraft service gracefully
-sudo systemctl stop minecraft
+# Stop the screen session gracefully
+logger "Stopping minecraft_java screen session..."
+/usr/bin/screen -S minecraft_java -X stuff "stop\n"
+sleep 5
+/usr/bin/screen -S minecraft_java -X quit
 
 # Wait for the server to fully stop
 logger "Waiting for server to stop gracefully..."
