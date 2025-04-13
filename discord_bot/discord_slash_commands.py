@@ -300,7 +300,7 @@ instances = [
         "instance_value": "minecraft-2024",
         "project": "jch-minecraft",
         "zone": "us-east5-c",
-        "server_url": "minecraft.card-howe.com:19132",
+        "server_url": "2024.minecraft.card-howe.com:19132",
         "stop_code": stop_code
     },
     {
@@ -308,7 +308,7 @@ instances = [
         "instance_value": "minecraft-2025",
         "project": "jch-minecraft",
         "zone": "us-east5-c",
-        "server_url": "minecraft.card-howe.com:25565",
+        "server_url": "2025.minecraft.card-howe.com:25565",
         "stop_code": stop_code
     },
 ]
