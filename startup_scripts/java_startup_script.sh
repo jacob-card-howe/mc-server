@@ -22,9 +22,16 @@ else
     sudo adduser --disabled-password --gecos 'User for running and managing Minecraft servers' minecraft
     sudo echo "minecraft     ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-    # Updates packages, installs dependencies
+    logger "Installing Java..."
+    # Follows steps from https://askubuntu.com/a/1386901
+    # Adds the Eclipse Adoptium GPG Key
+    sudo wget -O - https://packages.adoptium.net/artifactory/api/gpg/key/public | sudo apt-key add -
+
+    # Adds the Eclipse Adoptium apt repository
+    sudo echo "deb https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | sudo tee /etc/apt/sources.list.d/adoptium.list
+
     sudo apt update
-    sudo apt install openjdk-17-jre-headless -y # Installs java
+    sudo apt-get install screen git jq temurin-21-jre -y # Installs java
 
     # Tests that Java was installed successfully and is executable
     if ! [ -x "$(command -v java)" ]; then
@@ -103,12 +110,29 @@ else
     [Install]
     WantedBy=multi-user.target' > /etc/systemd/system/player_check.service
 
+    sudo echo '[Unit]
+    Description=Checks that the Minecraft Java server is running
+    Wants=network.target
+    After=local-fs.target network.target minecraft.service
+    [Service]
+    User=minecraft
+    Group=minecraft
+    UMask=0027
+
+    KillMode=none
+    SuccessExitStatus=0 1 255
+
+    ExecStart=/usr/bin/python3 /home/minecraft/mc-server/common/service_check.py
+
+    [Install]
+    WantedBy=multi-user.target' > /etc/systemd/system/service_check.service
+
 
     logger "Granting executor permissions to Minecraft Java Server bash scripts..."
     sudo chmod +x $MINECRAFT_HOME_DIR/mc-server/java/start_server.sh
     sudo chmod +x $MINECRAFT_HOME_DIR/mc-server/java/stop_server.sh
     sudo chmod +x $MINECRAFT_HOME_DIR/mc-server/java/player_check.sh
-    sudo chmod +x $MINECRAFT_HOME_DIR/mc-server/java/service_check.py
+    sudo chmod +x $MINECRAFT_HOME_DIR/mc-server/common/service_check.py
 
     # Set permissions on minecraft.service
     logger "Granting 644 on created services..."
@@ -125,9 +149,8 @@ else
     # Start the services
     logger "Starting services..."
     sudo systemctl start minecraft
-    sleep 120
-    # sudo systemctl start player_check
     sudo systemctl start service_check
+    sudo systemctl start player_check # Has a built-in 120 second delay
     exit 0
 
 fi
