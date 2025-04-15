@@ -1,23 +1,11 @@
-# This python script was written, and tested in Google Cloud Functions running
-# on a Pyhon 3.12 Base Image (Ubuntu 22.04 Full). It has not been tested for
-# any other Cloud Provider, though I suspect porting it to AWS or Azure wouldn't
-# be too large of a lift.
-
-# Some important notes about the Cloud Run Function's configuration within GCP:
-# 1. You need to allow ALL ingress traffic, and unauthenticated requests
-# 2. The container this runs on is open at port 8080
-# 3. The container has 256MiB of memory and <1 vCPU
-# 4. Request timeout is 60s
-
-# Make sure to replace any default '<REPLACE_ME>' values with your own configs
-
-# @TODO: Add this to the README
 import functions_framework
 import requests
 import time
 import sys
 import random
 import os
+import socket
+import struct
 from typing import Any
 
 from google.api_core.extended_operation import ExtendedOperation
@@ -35,6 +23,8 @@ public_discord_key = os.environ.get("DISCORD_APP_PUBLIC_KEY")
 bot_token = os.environ.get("DISCORD_BOT_TOKEN")
 
 gcp_project = os.environ.get("GCP_PROJECT")
+
+minecraft_rcon_password = os.environ.get("MINECRAFT_RCON_PASSWORD")
 
 instance_choices = [] # Gets populated below
 
@@ -165,6 +155,89 @@ def stop_server(interaction_id, interaction_token, server_name, stop_code):
     response = requests.post(default_callback_url, json=reply)
     return f"{response.status_code}"
 
+# RCON Protocol Implementation
+class RCONClient:
+    # RCON packet types
+    SERVERDATA_AUTH = 3
+    SERVERDATA_AUTH_RESPONSE = 2
+    SERVERDATA_EXECCOMMAND = 2
+    SERVERDATA_RESPONSE_VALUE = 0
+
+    def __init__(self, host, port, password):
+        self.host = host
+        self.port = port
+        self.password = password
+        self.socket = None
+        self.request_id = 0
+
+    def connect(self):
+        """Establish a connection to the RCON server"""
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.settimeout(5)  # 5 second timeout
+        self.socket.connect((self.host, self.port))
+
+        # Send authentication packet
+        auth_packet = self._create_packet(self.SERVERDATA_AUTH, self.password)
+        self.socket.send(auth_packet)
+
+        # Receive authentication response
+        response = self._receive_packet()
+        if response['id'] == -1:
+            raise Exception("Authentication failed")
+
+        return True
+
+    def disconnect(self):
+        """Close the connection"""
+        if self.socket:
+            self.socket.close()
+            self.socket = None
+
+    def command(self, command):
+        """Send a command to the RCON server and return the response"""
+        if not self.socket:
+            self.connect()
+
+        # Send command packet
+        command_packet = self._create_packet(self.SERVERDATA_EXECCOMMAND, command)
+        self.socket.send(command_packet)
+
+        # Receive response
+        response = self._receive_packet()
+        return response['payload']
+
+    def _create_packet(self, packet_type, payload):
+        """Create an RCON packet"""
+        self.request_id += 1
+        packet = struct.pack('<ii', self.request_id, packet_type)
+        packet += payload.encode('utf-8') + b'\x00\x00'
+        packet = struct.pack('<i', len(packet)) + packet
+        return packet
+
+    def _receive_packet(self):
+        """Receive and parse an RCON packet"""
+        # Read packet length
+        length_data = self.socket.recv(4)
+        if not length_data:
+            raise Exception("Connection closed by server")
+
+        length = struct.unpack('<i', length_data)[0]
+
+        # Read packet data
+        data = self.socket.recv(length)
+        if not data:
+            raise Exception("Connection closed by server")
+
+        # Parse packet
+        request_id, packet_type = struct.unpack('<ii', data[:8])
+        payload = data[8:-2].decode('utf-8')
+
+        return {
+            'id': request_id,
+            'type': packet_type,
+            'payload': payload
+        }
+
 def status_server(interaction_id, interaction_token, server_name):
     default_callback_url = f"https://discord.com/api/v10/interactions/{interaction_id}/{interaction_token}/callback"
 
@@ -196,6 +269,7 @@ def status_server(interaction_id, interaction_token, server_name):
     public_ip = access_config.nat_i_p
 
     game_server_status = ""
+    player_list = ""
 
     # Check if an access config is available
     if network_interface.access_configs:
@@ -223,6 +297,31 @@ def status_server(interaction_id, interaction_token, server_name):
         # print(game_server_response.status_code) # Debug
         if game_server_response.status_code == 200:
             game_server_status = "Minecraft is running!"
+
+            # Try to get player list using our custom RCON client
+            try:
+                rcon = RCONClient(public_ip, 27575, minecraft_rcon_password)
+                rcon.connect()
+                response = rcon.command("list")
+                rcon.disconnect()
+
+                # Parse the response to extract player names
+                # Format is typically: "There are X of a max of Y players online: player1, player2, player3"
+                if "There are" in response and "players online:" in response:
+                    players_part = response.split("players online:")[1].strip()
+                    if players_part and players_part != "":
+                        players = [p.strip() for p in players_part.split(",")]
+                        player_list = "**_Current Players Online_**:\n```txt\n"
+                        for player in players:
+                            player_list += f"- {player}\n"
+                        player_list += "```"
+                    else:
+                        player_list = "```txt\nNobody's online right now!\n```"
+                else:
+                    player_list = "```txt\nNobody's online right now!\n```"
+            except Exception as e:
+                print(f"Error getting player list: {e}")
+                player_list = "```txt\nUnable to retrieve player list.\n```"
         else:
             game_server_status = "Either Minecraft is not running, or the host server is down. Couldn't get game server status, try again later!"
     else:
@@ -232,7 +331,7 @@ def status_server(interaction_id, interaction_token, server_name):
         "type": 4,
         "data": {
                 "tts": False,
-                "content": f"**Server info:**\n* Host Status: `{instance_info.status}`\n* Game Server Status: `{game_server_status}`\n* Public IP: `{public_ip}`",
+                "content": f"**Server info:**\n* Host Status: `{instance_info.status}`\n* Game Server Status: `{game_server_status}`\n* Public IP: `{public_ip}`\n{player_list}",
                 "embeds": [],
                 "allowed_mentions": {"parse": []},
         }
@@ -296,14 +395,6 @@ print(f"Stop Code: {stop_code}")
 # Because the AggregateList API method takes too long, we're going to hardcode options here
 instances = [
     {
-        "name": "Minecraft 2024 (Bedrock)",
-        "instance_value": "minecraft-2024",
-        "project": "jch-minecraft",
-        "zone": "us-east5-c",
-        "server_url": "2024.minecraft.card-howe.com:19132",
-        "stop_code": stop_code
-    },
-    {
         "name": "Minecraft 2025 (Java)",
         "instance_value": "minecraft-2025",
         "project": "jch-minecraft",
@@ -311,6 +402,15 @@ instances = [
         "server_url": "2025.minecraft.card-howe.com:25565",
         "stop_code": stop_code
     },
+    {
+        "name": "Minecraft 2024 (Bedrock)",
+        "instance_value": "minecraft-2024",
+        "project": "jch-minecraft",
+        "zone": "us-east5-c",
+        "server_url": "2024.minecraft.card-howe.com:19132",
+        "stop_code": stop_code
+    },
+
 ]
 
 for instance in instances:
